@@ -1,0 +1,25 @@
+---
+- hosts: riak
+  sudo: true
+  roles:
+    - { role: ansible-riak }
+  vars:
+    ring_leader_ip: "{{ hostvars[groups['riak'][0]]['ansible_eth1']['ipv4']['address'] }}"
+    ring_leader: "riak@{{ ring_leader_ip  }}"
+    riak_node_name: "riak@{{ ansible_eth1['ipv4']['address'] }}"
+  tasks:
+    - name: Join the cluster
+      riak: command=join target_node={{ ring_leader }}
+      when: inventory_hostname != groups['riak'][0]
+
+    - name: Check Riak Ring
+      command: 'riak-admin cluster status'
+      register: riak_ring_status
+
+    - name: Plan the cluster
+      riak: command=plan wait_for_ring=300
+      when: riak_ring_status.stdout.find('joining') > 0 and inventory_hostname == groups['riak'][0]
+
+    - name: Commit the cluster
+      riak: command=commit wait_for_handoffs=300
+      when: riak_ring_status.stdout.find('joining') > 0 and inventory_hostname == groups['riak'][0]
