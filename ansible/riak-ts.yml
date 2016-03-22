@@ -4,13 +4,47 @@
   roles:
     - { role: ansible-riak }
   vars:
+#   ## Riak vars
     riak_package: riak-ts
     riak_backend: leveldb
     anti_entropy: passive
     ring_leader_ip: "{{ hostvars[groups['riak-ts'][0]]['ansible_eth1']['ipv4']['address'] }}"
     ring_leader: "riak@{{ ring_leader_ip  }}"
     riak_node_name: "riak@{{ ansible_eth1['ipv4']['address'] }}"
+#    ## Demo vars
+    demo_dir: /home/{{ ansible_ssh_user }}/ts-demo
+    demo_data_archive: citypulse_traffic_raw_data_surrey_feb_jun_2014.tar.gz
+#   # Currently, for Ubuntu only
+    demo_pkg_deps:
+      - git
+      - daemon
+      - python-dev
+      - libffi-dev
+      - libssl-dev
+      - libpng12-dev
+      - libfreetype6
+      - libfreetype6-dev
+      - python-pip
+      - libpython-dev
+      - libevent-dev
+      - pkg-config
+    demo_pip_global_deps:
+      - pip
+      - virtualenv
+    demo_pip_venv_deps:
+      - jupyter
+      - riak
+    demo_git_repo:
+      org: datalemming
+      name: ts12-demo
+      files:
+        - "Create table aarhus2.ipynb"
+        - "Querying aarhus2 data.ipynb"
+        - load-data-v2.py
+        - requirements.txt
+        - sql-notes-v2.txt        
   tasks:
+#   ## Riak Clustering
     - name: Join the cluster
       riak: command=join target_node={{ ring_leader }}
       when: inventory_hostname != groups['riak-ts'][0]
@@ -26,3 +60,64 @@
     - name: Commit the cluster
       riak: command=commit wait_for_handoffs=300
       when: riak_ring_status.stdout.find('joining') > 0 and inventory_hostname == groups['riak-ts'][0]
+
+#   ## Demo setup
+    - name: Install demo package deps
+      package: name={{ item }} state=latest
+      with_items: "{{ demo_pkg_deps }}"
+      when: inventory_hostname == groups['riak-ts'][0]
+
+    - name: Install demo global pip deps
+      pip: name={{ item }} state=latest
+      with_items: "{{ demo_pip_global_deps }}"
+      when: inventory_hostname == groups['riak-ts'][0]
+
+    - name: Create the demo virtualenv
+      sudo: no
+      command: "virtualenv {{ demo_dir }}"
+      args:
+        creates: "{{ demo_dir }}"
+      when: inventory_hostname == groups['riak-ts'][0]
+
+    - name: Pull down demo data
+      get_url: url=http://iot.ee.surrey.ac.uk:8080/datasets/traffic/traffic_feb_june/{{ demo_data_archive }} dest={{ demo_dir }}/{{ demo_data_archive }}
+      when: inventory_hostname == groups['riak-ts'][0]
+
+    - name: Extract the demo data
+      unarchive: src={{ demo_dir }}/{{ demo_data_archive }} dest={{ demo_dir }} copy=no
+      when: inventory_hostname == groups['riak-ts'][0]
+
+    - name: Pull down demo git repos
+      sudo: no
+      git: repo=ssh://git@github.com/{{ demo_git_repo.org }}/{{ demo_git_repo.name }}.git dest={{ demo_dir }}/{{ demo_git_repo.name }} accept_hostkey=yes
+      when: inventory_hostname == groups['riak-ts'][0]
+
+    - name: Copy demo materials to the demo virtualenv
+      sudo: no
+      copy: src={{ demo_dir }}/{{ demo_git_repo.name }}/{{ item }} dest={{ demo_dir }}/{{ item }} remote_src=True
+      with_items: "{{ demo_git_repo.files }}"
+      when: inventory_hostname == groups['riak-ts'][0]
+
+    - name: Install virtualenv pip requirements
+      sudo: no
+      pip: virtualenv={{ demo_dir }} requirements={{ demo_dir }}/requirements.txt state=latest
+      when: inventory_hostname == groups['riak-ts'][0]
+
+    - name: Install virtualenv pip deps
+      sudo: no
+      pip: name={{ item }} virtualenv={{ demo_dir }} state=latest
+      with_items: "{{ demo_pip_venv_deps }}"
+      when: inventory_hostname == groups['riak-ts'][0]
+
+    - name: Launch jupyter
+      sudo: no
+      shell: ". bin/activate; daemon -- jupyter notebook --no-browser --notebook-dir {{ demo_dir }}"
+      args:
+        chdir: "{{ demo_dir }}"
+        executable: /bin/bash
+      when: inventory_hostname == groups['riak-ts'][0]
+
+    - name: Demo info
+      debug: msg="To access the demo page, run `vagrant ssh {{ groups['riak-ts'][0] }} -- -NfgL8888:localhost:8888`, and then head to 'http://localhost:8888' in your web browser"
+      when: inventory_hostname == groups['riak-ts'][0]
+

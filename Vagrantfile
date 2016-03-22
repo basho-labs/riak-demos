@@ -6,7 +6,7 @@ require 'json'
 Vagrant.configure('2') do |config|
   config.ssh.forward_agent = true
   ## Grab a list of roles to run, or default to a basic set
-  roles = (ENV['PLAYBOOKS'] || 'riak.yml').gsub(/\.yml/,'').split(',') 
+  roles = (ENV['PLAYBOOKS'] || 'riak-ts.yml').gsub(/\.yml/,'').split(',') 
 
   ## Allow multiple machines to be provisioned per role
   role_num = (ENV['ROLE_NUM'] || 5)
