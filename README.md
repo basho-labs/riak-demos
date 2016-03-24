@@ -18,7 +18,7 @@ git submodule update
 vagrant up
 
 ## Log in to the primary node
-vagrant ssh riak1
+vagrant ssh riak-ts1
 ```
 
 ## Optional Variables
