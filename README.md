@@ -8,7 +8,10 @@ This project provides a simple sandbox environment for provisioning and testing 
 # Quick Start
 ```
 ## Clone the repo
-git clone git@github.com:basho-labs/riak-demos
+git clone https://github.com:basho-labs/riak-demos.git
+
+## Go into the repo directory
+cd riak-demos
 
 ## Initialize and pull down the ansible-riak role
 git submodule init
@@ -19,6 +22,9 @@ vagrant up
 
 ## Log in to the primary node
 vagrant ssh riak-ts1
+
+## Once you're done, clean up
+vagrant destroy -f
 ```
 
 ## Optional Variables
@@ -26,8 +32,8 @@ Vagrant and ansible settings can be configured via environment variables before 
 ```
 ## Change the playbook used to install and configure the VMs
 ## The machines will be named after the playbook.
-## In this case "riak-ts1", "riak-ts2", etc. Defaults to 'riak.yml'
-export PLAYBOOKS='riak-ts.yml'
+## In this case "riak1", "riak2", etc. Defaults to 'riak-ts.yml'
+export PLAYBOOKS='riak.yml'
 
 ## Change the number of VMs provisioned. Defaults to '5'
 export ROLE_NUM=7

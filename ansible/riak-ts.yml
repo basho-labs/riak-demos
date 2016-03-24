@@ -4,17 +4,16 @@
   roles:
     - { role: ansible-riak }
   vars:
-#   ## Riak vars
+    ## Riak vars
     riak_package: riak-ts
     riak_backend: leveldb
     anti_entropy: passive
     ring_leader_ip: "{{ hostvars[groups['riak-ts'][0]]['ansible_eth1']['ipv4']['address'] }}"
     ring_leader: "riak@{{ ring_leader_ip  }}"
     riak_node_name: "riak@{{ ansible_eth1['ipv4']['address'] }}"
-#    ## Demo vars
+    ## Demo vars
     demo_dir: /home/{{ ansible_ssh_user }}/ts-demo
-    demo_data_archive: citypulse_traffic_raw_data_surrey_feb_jun_2014.tar.gz
-#   # Currently, for Ubuntu only
+    # Currently, for Ubuntu only
     demo_pkg_deps:
       - git
       - daemon
@@ -34,17 +33,12 @@
     demo_pip_venv_deps:
       - jupyter
       - riak
-    demo_git_repo:
-      org: datalemming
-      name: ts12-demo
-      files:
-        - "Create table aarhus2.ipynb"
-        - "Querying aarhus2 data.ipynb"
-        - load-data-v2.py
-        - requirements.txt
-        - sql-notes-v2.txt        
+    demo_location: https://s3.amazonaws.com/files.basho.com/demos/time_series
+    demo_materials: 
+      - aarhusdemofiles.tar
+      - all-data-2.tar.gz
   tasks:
-#   ## Riak Clustering
+    ## Riak Clustering
     - name: Join the cluster
       riak: command=join target_node={{ ring_leader }}
       when: inventory_hostname != groups['riak-ts'][0]
@@ -61,7 +55,7 @@
       riak: command=commit wait_for_handoffs=300
       when: riak_ring_status.stdout.find('joining') > 0 and inventory_hostname == groups['riak-ts'][0]
 
-#   ## Demo setup
+    ## Demo setup
     - name: Install demo package deps
       package: name={{ item }} state=latest
       with_items: "{{ demo_pkg_deps }}"
@@ -79,23 +73,14 @@
         creates: "{{ demo_dir }}"
       when: inventory_hostname == groups['riak-ts'][0]
 
-    - name: Pull down demo data
-      get_url: url=http://iot.ee.surrey.ac.uk:8080/datasets/traffic/traffic_feb_june/{{ demo_data_archive }} dest={{ demo_dir }}/{{ demo_data_archive }}
+    - name: Pull down demo materials
+      get_url: url={{ demo_location }}/{{ item }} dest={{ demo_dir }}/{{ item }}
+      with_items: demo_materials
       when: inventory_hostname == groups['riak-ts'][0]
 
     - name: Extract the demo data
-      unarchive: src={{ demo_dir }}/{{ demo_data_archive }} dest={{ demo_dir }} copy=no
-      when: inventory_hostname == groups['riak-ts'][0]
-
-    - name: Pull down demo git repos
-      sudo: no
-      git: repo=ssh://git@github.com/{{ demo_git_repo.org }}/{{ demo_git_repo.name }}.git dest={{ demo_dir }}/{{ demo_git_repo.name }} accept_hostkey=yes
-      when: inventory_hostname == groups['riak-ts'][0]
-
-    - name: Copy demo materials to the demo virtualenv
-      sudo: no
-      copy: src={{ demo_dir }}/{{ demo_git_repo.name }}/{{ item }} dest={{ demo_dir }}/{{ item }} remote_src=True
-      with_items: "{{ demo_git_repo.files }}"
+      unarchive: src={{ demo_dir }}/{{ item }} dest={{ demo_dir }} copy=no
+      with_items: demo_materials
       when: inventory_hostname == groups['riak-ts'][0]
 
     - name: Install virtualenv pip requirements
@@ -120,4 +105,3 @@
     - name: Demo info
       debug: msg="To access the demo page, run `vagrant ssh {{ groups['riak-ts'][0] }} -- -NfgL8888:localhost:8888`, and then head to 'http://localhost:8888' in your web browser"
       when: inventory_hostname == groups['riak-ts'][0]
-
