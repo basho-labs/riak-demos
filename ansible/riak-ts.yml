@@ -75,12 +75,12 @@
 
     - name: Pull down demo materials
       get_url: url={{ demo_location }}/{{ item }} dest={{ demo_dir }}/{{ item }}
-      with_items: demo_materials
+      with_items: "{{ demo_materials }}"
       when: inventory_hostname == groups['riak-ts'][0]
 
     - name: Extract the demo data
       unarchive: src={{ demo_dir }}/{{ item }} dest={{ demo_dir }} copy=no
-      with_items: demo_materials
+      with_items: "{{ demo_materials }}"
       when: inventory_hostname == groups['riak-ts'][0]
 
     - name: Install virtualenv pip requirements
