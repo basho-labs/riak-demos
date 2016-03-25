@@ -13,8 +13,8 @@ Vagrant.configure('2') do |config|
 
   ## Set memory size and # of cpus from env vars
   config.vm.provider "virtualbox" do |v|
-    v.memory = (ENV['VAGRANT_RAM'] || 1024)
-    v.cpus = (ENV['VAGRANT_CPU'] || 1)
+    v.memory = (ENV['VAGRANT_RAM'] || 1536)
+    v.cpus = (ENV['VAGRANT_CPU'] || 2)
   end
 
   ## Set ansible 'extra_vars' and 'tags' from env vars
