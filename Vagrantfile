@@ -13,7 +13,7 @@ Vagrant.configure('2') do |config|
 
   ## Set memory size and # of cpus from env vars
   config.vm.provider "virtualbox" do |v|
-    v.memory = (ENV['VAGRANT_RAM'] || 1536)
+    v.memory = (ENV['VAGRANT_RAM'] || 2048)
     v.cpus = (ENV['VAGRANT_CPU'] || 2)
   end
 
