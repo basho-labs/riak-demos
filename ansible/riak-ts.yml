@@ -11,6 +11,7 @@
     ring_leader_ip: "{{ hostvars[groups['riak-ts'][0]]['ansible_eth1']['ipv4']['address'] }}"
     ring_leader: "riak@{{ ring_leader_ip  }}"
     riak_node_name: "riak@{{ ansible_eth1['ipv4']['address'] }}"
+    riak_shell_group: riak-ts
     ## Demo vars
     demo_dir: /home/{{ ansible_ssh_user }}/ts-demo
     # Currently, for Ubuntu only
