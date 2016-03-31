@@ -9,7 +9,7 @@ Vagrant.configure('2') do |config|
   roles = (ENV['PLAYBOOKS'] || 'riak-ts.yml').gsub(/\.yml/,'').split(',') 
 
   ## Allow multiple machines to be provisioned per role
-  role_num = (ENV['ROLE_NUM'] || 3)
+  cluster_size = (ENV['CLUSTER_SIZE'] || 3)
 
   ## Set memory size and # of cpus from env vars
   config.vm.provider "virtualbox" do |v|
@@ -34,7 +34,7 @@ Vagrant.configure('2') do |config|
     ## feed the array to ansible.groups so it builds the inventory
     ## correctly
     vm_names = Array.new
-    (1..role_num).each do |count|
+    (1..cluster_size).each do |count|
       vm_names.push("#{role}#{count}")
     end
 
