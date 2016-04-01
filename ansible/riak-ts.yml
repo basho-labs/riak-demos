@@ -5,6 +5,7 @@
     - { role: ansible-riak }
   vars:
     ## Riak vars
+    riak_ring_size: 16
     riak_package: riak-ts
     riak_backend: leveldb
     anti_entropy: passive

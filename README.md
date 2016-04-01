@@ -36,7 +36,7 @@ Vagrant and ansible settings can be configured via environment variables before 
 export PLAYBOOKS='riak.yml'
 
 ## Change the number of VMs provisioned. Defaults to '5'
-export ROLE_NUM=7
+export CLUSTER_SIZE=7
 
 ## Change CPU and RAM VMs are provisioned with
 export VAGRANT_RAM=4096 #Defaults to 1024
