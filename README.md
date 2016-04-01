@@ -1,9 +1,23 @@
 This project provides a simple sandbox environment for provisioning and testing Riak and Riak TS nodes and clusters. This project includes a submodule that links to Basho's ansible-riak role, as well as example playbooks that are used to provision and cluster Vagrant VMs. The role and playbooks can be used as working examples to provision and cluster riak nodes outside of the sandbox environment.
 
+# What to expect
+By default, this demo will:
+* provision 3 VMs running Ubuntu 14.04, each with 2GB RAM and 2 CPU
+* Install Riak TS via the ansible-riak ansible role
+* Cluster Riak TS on all VMs
+* Configure Riak Shell on all nodes for use with the cluster
+* Set up a demo in `/home/vagrant/ts-demo` that includes:
+  * A python notebook for creating Time Series tables
+  * ~1 million rows of real world Time Series data and a loader script
+  * A python notebook to query and manipulate data within Riak TS
+* Launch the jupyter webserver in the demo directory to run the python notebooks
+
+
 # Dependencies
-* ansible (Tested with 2.0.1.0)
-* vagrant (Tested with 1.8.1)
-* VirtualBox (Tested with 5.0.16)
+* [git](https://git-scm.com/downloads) (Tested with 1.9.1)
+* [ansible](http://docs.ansible.com/ansible/intro_installation.html) (Tested with 2.0.1.0)
+* [vagrant](https://www.vagrantup.com/downloads.html) (Tested with 1.8.1)
+* [virtualBox](https://www.virtualbox.org/wiki/Downloads) (Tested with 5.0.16)
 
 # Quick Start
 ```
@@ -35,12 +49,12 @@ Vagrant and ansible settings can be configured via environment variables before 
 ## In this case "riak1", "riak2", etc. Defaults to 'riak-ts.yml'
 export PLAYBOOKS='riak.yml'
 
-## Change the number of VMs provisioned. Defaults to '5'
+## Change the number of VMs provisioned. Defaults to '3'
 export CLUSTER_SIZE=7
 
 ## Change CPU and RAM VMs are provisioned with
-export VAGRANT_RAM=4096 #Defaults to 1024
-export VAGRANT_CPU=4 #Defaults to 1
+export VAGRANT_RAM=4096 #Defaults to 2048
+export VAGRANT_CPU=4 #Defaults to 2
 
 ## Change the OS vagrant will provision
 ## Defaults to 'ubuntu/trusty64', has not been tested with others
