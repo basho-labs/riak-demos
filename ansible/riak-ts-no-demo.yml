@@ -1,0 +1,33 @@
+---
+- hosts: riak-ts-no-demo
+  sudo: true
+  roles:
+    - { role: ansible-riak }
+  vars:
+    ## Riak vars
+    riak_ring_size: 16
+    riak_package: riak-ts
+    riak_backend: leveldb
+    anti_entropy: passive
+    ring_leader_ip: "{{ hostvars[groups['riak-ts-no-demo'][0]]['ansible_eth1']['ipv4']['address'] }}"
+    ring_leader: "riak@{{ ring_leader_ip  }}"
+    riak_node_name: "riak@{{ ansible_eth1['ipv4']['address'] }}"
+    riak_shell_interface: 'ansible_eth1'
+    riak_shell_group: riak-ts-no-demo
+  tasks:
+    ## Riak Clustering
+    - name: Join the cluster
+      riak: command=join target_node={{ ring_leader }}
+      when: inventory_hostname != groups['riak-ts-no-demo'][0]
+
+    - name: Check Riak Ring
+      command: 'riak-admin cluster status'
+      register: riak_ring_status
+
+    - name: Plan the cluster
+      riak: command=plan wait_for_ring=300
+      when: riak_ring_status.stdout.find('joining') > 0 and inventory_hostname == groups['riak-ts-no-demo'][0]
+
+    - name: Commit the cluster
+      riak: command=commit wait_for_handoffs=300
+      when: riak_ring_status.stdout.find('joining') > 0 and inventory_hostname == groups['riak-ts-no-demo'][0]
