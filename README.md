@@ -1,4 +1,4 @@
-This project provides a simple sandbox environment for provisioning and testing Riak and Riak TS nodes and clusters. This project includes a submodule that links to Basho's ansible-riak role, as well as example playbooks that are used to provision and cluster Vagrant VMs. The role and playbooks can be used as working examples to provision and cluster riak nodes outside of the sandbox environment.
+This project provides a simple sandbox environment for provisioning and testing Riak and Riak TS nodes and clusters. This project includes a submodule that links to Basho's ansible-riak role, as well as example playbooks that are used to provision and cluster Vagrant VMs. The role and playbooks can be used as working examples to provision and cluster riak nodes outside of the sandbox environment. An overview of running this material on your own machines can be found [here](https://github.com/basho-labs/riak-demos/wiki/Provision-a-cluster-outside-of-vagrant).
 
 # What to expect
 By default, this demo will:
