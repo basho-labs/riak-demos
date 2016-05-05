@@ -8,7 +8,7 @@
     riak_ring_size: 16
     riak_package: riak-ts
     riak_backend: leveldb
-    anti_entropy: passive
+    riak_anti_entropy: passive
     ring_leader_ip: "{{ hostvars[groups['riak-ts'][0]]['ansible_eth1']['ipv4']['address'] }}"
     ring_leader: "riak@{{ ring_leader_ip  }}"
     riak_node_name: "riak@{{ ansible_eth1['ipv4']['address'] }}"
