@@ -9,7 +9,7 @@ Vagrant.configure('2') do |config|
   roles = (ENV['PLAYBOOKS'] || 'riak-ts.yml').gsub(/\.yml/,'').split(',') 
 
   ## Allow multiple machines to be provisioned per role
-  cluster_size = (ENV['CLUSTER_SIZE'] || 3)
+  cluster_size = (ENV['CLUSTER_SIZE'].to_i || 3)
 
   ## Set memory size and # of cpus from env vars
   config.vm.provider "virtualbox" do |v|
